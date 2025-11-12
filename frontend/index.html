@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Python Quiz Master</title>
+	<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+	<header class="header">
+		<h1>Python Quiz Master</h1>
+		<p class="subtitle">Test your Python basics with beginner-friendly questions.</p>
+	</header>
+
+	<main class="main">
+		<section class="status-panel">
+			<div class="stat-card" id="total-questions-card">
+				<span class="stat-label">Total Questions</span>
+				<span class="stat-value" id="total-questions">-</span>
+			</div>
+			<div class="stat-card">
+				<span class="stat-label">Score</span>
+				<span class="stat-value" id="score">0 / 0</span>
+			</div>
+			<div class="stat-card">
+				<span class="stat-label">Last Result</span>
+				<span class="stat-value" id="last-result">-</span>
+			</div>
+		</section>
+
+		<section class="quiz-card" id="quiz-card">
+			<div class="question-meta">
+				<span class="question-number" id="question-number">Question</span>
+			</div>
+			<h2 class="question-text" id="question-text">Loading question...</h2>
+
+			<ul class="options" id="options">
+				<!-- Options injected via JavaScript -->
+			</ul>
+
+			<div class="feedback" id="feedback"></div>
+
+			<div class="actions">
+				<button type="button" id="submit-btn" class="primary">Submit Answer</button>
+				<button type="button" id="skip-btn" class="secondary">Skip</button>
+				<button type="button" id="next-btn" class="secondary hidden">Next Question</button>
+			</div>
+		</section>
+
+		<section class="info-panel">
+			<h3>How it works</h3>
+			<ol>
+				<li>Click on an option to choose your answer.</li>
+				<li>Hit “Submit Answer” to check if you’re correct.</li>
+				<li>Use “Skip” to move on without answering.</li>
+				<li>After submitting, read the explanation and continue.</li>
+			</ol>
+
+			<h3>API Endpoints in Use</h3>
+			<ul>
+				<li><code>GET /api/stats</code></li>
+				<li><code>GET /api/questions/random</code></li>
+				<li><code>POST /api/quiz/submit</code></li>
+			</ul>
+		</section>
+	</main>
+
+	<footer class="footer">
+		<p>Powered by the Python Quiz REST API.</p>
+	</footer>
+
+	<div id="toast" role="status" aria-live="polite"></div>
+
+	<script src="app.js"></script>
+</body>
+</html>
+

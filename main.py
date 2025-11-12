@@ -4,6 +4,7 @@ Provides endpoints for frontend to interact with quiz questions and submit answe
 """
 
 from fastapi import FastAPI, HTTPException
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import List, Optional
@@ -142,13 +143,14 @@ def question_to_response(question: Question, question_id: int, include_answer: b
 
 # API Endpoints
 
-@app.get("/", tags=["Root"])
-async def root():
-	"""Root endpoint with API information"""
+@app.get("/api", tags=["Root"])
+async def api_root():
+	"""API info endpoint (Root path serves the frontend)."""
 	return {
 		"message": "Python Quiz API",
 		"version": "1.0.0",
 		"endpoints": {
+			"frontend": "/",
 			"questions": "/api/questions",
 			"random_question": "/api/questions/random",
 			"submit_answer": "/api/quiz/submit",
@@ -188,30 +190,30 @@ async def get_all_questions():
 	]
 
 
-@app.get("/api/questions/{question_id}", response_model=QuestionResponse, tags=["Questions"])
-async def get_question(question_id: int):
-	"""
-	Get a specific question by ID (without correct answer).
-	
-	- **question_id**: Zero-based index of the question (0 to total_questions-1)
-	"""
-	if question_id < 0 or question_id >= len(QUESTIONS):
-		raise HTTPException(
-			status_code=404,
-			detail=f"Question with ID {question_id} not found. Available IDs: 0-{len(QUESTIONS)-1}"
-		)
-	return QuestionResponse(**question_to_response(QUESTIONS[question_id], question_id))
-
-
 @app.get("/api/questions/random", response_model=QuestionResponse, tags=["Questions"])
 async def get_random_question():
-	"""
-	Get a random question (without correct answer).
-	
-	Useful for presenting questions in random order to users.
-	"""
-	question_id = random.randint(0, len(QUESTIONS) - 1)
-	return QuestionResponse(**question_to_response(QUESTIONS[question_id], question_id))
+    """
+    Get a random question (without correct answer).
+    
+    Useful for presenting questions in random order to users.
+    """
+    question_id = random.randint(0, len(QUESTIONS) - 1)
+    return QuestionResponse(**question_to_response(QUESTIONS[question_id], question_id))
+
+
+@app.get("/api/questions/{question_id}", response_model=QuestionResponse, tags=["Questions"])
+async def get_question(question_id: int):
+    """
+    Get a specific question by ID (without correct answer).
+    
+    - **question_id**: Zero-based index of the question (0 to total_questions-1)
+    """
+    if question_id < 0 or question_id >= len(QUESTIONS):
+        raise HTTPException(
+            status_code=404,
+            detail=f"Question with ID {question_id} not found. Available IDs: 0-{len(QUESTIONS)-1}"
+        )
+    return QuestionResponse(**question_to_response(QUESTIONS[question_id], question_id))
 
 
 @app.get("/api/questions/{question_id}/detail", response_model=QuestionDetailResponse, tags=["Questions"])
@@ -257,7 +259,7 @@ async def submit_answer(request: AnswerSubmitRequest):
 	# Get the correct answer text
 	correct_idx = LETTER_KEYS.index(question.correct_option_key)
 	correct_answer_text = question.options[correct_idx]
-	
+
 	return AnswerResponse(
 		is_correct=is_correct,
 		correct_answer=question.correct_option_key,
@@ -265,6 +267,14 @@ async def submit_answer(request: AnswerSubmitRequest):
 		explanation=question.explanation
 	)
 
+
+# Serve the frontend (static files) at the root path
+# This must be mounted AFTER API routes so that "/api/..." keeps working.
+app.mount(
+	"/",
+	StaticFiles(directory="frontend", html=True),
+	name="frontend"
+)
 
 if __name__ == "__main__":
 	import uvicorn
